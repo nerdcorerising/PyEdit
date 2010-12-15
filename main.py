@@ -1,12 +1,12 @@
 import tkinter
 import menus
 
-class Application(tkinter.Frame):              
+class Application(tkinter.Tk):              
     def __init__(self, master=None):
         """Initialize the frame, creating the text area and menus, 
         plus any other necessary widgets."""
         
-        tkinter.Frame.__init__(self, master)   
+        tkinter.Tk.__init__(self, master)   
         self.grid()
         self.wrap = False
         self.menurow = 0
@@ -47,6 +47,6 @@ class Application(tkinter.Frame):
 
 
 app = Application()                    
-app.master.title("PyEdit") 
-app.master.config(menu=app.menu)
+app.title("PyEdit") 
+app.config(menu=app.menu)
 app.mainloop()    
