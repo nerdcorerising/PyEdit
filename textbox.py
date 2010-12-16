@@ -28,6 +28,17 @@ class EnhancedTextBox(tk.Text):
         #get rid of trailing newline from string conversion
         block = block[:len(block) - 1]
         output.write(block)
+        output.flush()
+        
+    def getCharWordCount(self):
+        block = self.get(1.0, tk.END)
+        c = len(block)
+        block = block.split()
+        w = len(block)
+        return (w,c)
+        
+    def setFont(self, f):
+        this.configur(font=f)
         
 if __name__ == "__main__":
     print ("TextBox is a library.")

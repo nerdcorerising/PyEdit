@@ -13,6 +13,7 @@ def createEditMenu(master):
     editmenu = tk.Menu(master, tearoff=0)
     editmenu.add_command(label="Undo",command=master.master.undo)
     editmenu.add_command(label="Redo",command=master.master.redo)
+    editmenu.add_command(label="Update Word Count",command=master.master.updateWordCount)
     return editmenu
     
 def createOptionsMenu(master):
