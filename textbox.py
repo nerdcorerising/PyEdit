@@ -32,13 +32,13 @@ class EnhancedTextBox(tk.Text):
         
     def getCharWordCount(self):
         block = self.get(1.0, tk.END)
-        c = len(block)
+        c = len(block) - 1
         block = block.split()
         w = len(block)
         return (w,c)
         
     def setFont(self, f):
-        this.configur(font=f)
+        self.configure(font=f)
         
 if __name__ == "__main__":
     print ("TextBox is a library.")

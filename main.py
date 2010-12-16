@@ -1,6 +1,8 @@
 import tkinter as tk
 import menus
 from textbox import EnhancedTextBox          
+from tkinter import messagebox
+from tkinter import font
 from tkinter.filedialog import askopenfilename 
 from tkinter.filedialog import asksaveasfilename
 
@@ -14,8 +16,9 @@ class Application(tk.Tk):
     status = None
     line = None
     column = None
-    words = None
-    characters = None
+    
+    controlSize = None
+    controlType = None
     
     font = ("Helvetica", 12)
     
@@ -30,6 +33,8 @@ class Application(tk.Tk):
         self.grid()
         
         self.createWidgets()
+        self.controlSize = tk.IntVar()
+        self.controlType = tk.StringVar()
         self.createMenu()
         
         
@@ -40,10 +45,6 @@ class Application(tk.Tk):
         self.line.pack(side=tk.LEFT,fill=tk.Y)
         self.column = tk.Label(self.status, text="Column number: 0")
         self.column.pack(side=tk.LEFT,fill=tk.Y)
-        self.characters = tk.Label(self.status, text="Total characters: 0")
-        self.characters.pack(side=tk.RIGHT,fill=tk.Y)
-        self.words = tk.Label(self.status, text="Total words: 0")
-        self.words.pack(side=tk.RIGHT,fill=tk.Y)
         
         self.status.pack(side=tk.BOTTOM,fill=tk.X)
         
@@ -71,7 +72,8 @@ class Application(tk.Tk):
         self.menu = tk.Menu(master=self)
         self.menu.add_cascade(label="File", menu=menus.createFileMenu(self.menu))
         self.menu.add_cascade(label="Edit", menu=menus.createEditMenu(self.menu))
-        self.menu.add_cascade(label="Options", menu=menus.createOptionsMenu(self.menu))
+        self.menu.add_cascade(label="Options", menu=menus.createOptionsMenu(self.menu,
+            self.controlSize,self.controlType,font.families()))
         
     def openFile(self):
         """Opens a file and passes it to the EnhancedTextBox, which
@@ -132,26 +134,31 @@ class Application(tk.Tk):
      
     def updateWordCount(self):
         word,char = self.text.getCharWordCount()
-        s = "Total words: %s" % word
-        self.words.configure(text=s)
-        s = "Total characters: %s" % char
-        self.characters.configure(text=s)
-     
+        s = "Total words: %s\nTotal characters: %s" % (word,char)
+        messagebox.showinfo(title="Count",message=s)
+        
     def getPosition(self,event):
         """get the line and column number of the text insertion point"""
         line, column = app.text.index('insert').split('.')
-        s = "Line number:%s " % line
+        s = "Line number: %s " % line
         app.line.configure(text=s)
-        s = "Column number:%s " % column
+        s = "Column number: %s " % (int(column) + 1)
         app.column.configure(text=s)
         
-    def setFontSize(self, size):
-        self.font = (self.font[0], size)
-        this.text.setFont(self.font)
+    def setFontSize(self, size=None):
+        if(size == None):
+            self.setFontSize(self.controlSize.get())
+        else:
+            self.font = (self.font[0], size)
+            self.text.setFont(self.font)
     
-    def setFontType(self, type):
-        self.font = (type, self.font[1])
-        this.text.setFont(self.font)
+    def setFontType(self, type=None):
+        if(type == None):
+            self.setFontType(self.controlType.get())
+        else:
+            self.font = (type, self.font[1])
+            self.text.setFont(self.font)
+        
     
 if __name__ == "__main__":
     app = Application()                    
