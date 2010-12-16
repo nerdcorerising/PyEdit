@@ -4,15 +4,19 @@ class Lexer:
     """A flexible lexer that will parse the language according
     to the grammar provided."""
     
+    __lexfile = None
     __ready = False
     __buffer = None
+    __color = None
     
     def __init__(self,lex=None):
-        pass
+        if(lex != None):
+            self.__lexfile = lex
         
     def insert(self,line):
-        self.__ready = True
-        self.__buffer = line
+        if(self.__lexfile == None):
+            self.__ready = True
+            self.__buffer = line
         
     def ready(self):
         return self.__ready
@@ -20,7 +24,9 @@ class Lexer:
     def dispense(self):
         """Returns the current word and the color it should be."""
         self.__ready = False
-        return self.__buffer, None
+        tempbuff, tempcolor = self.__buffer, self.__color
+        self.__buffer, self.__color = (None, None)
+        return (tempbuff, tempcolor)
     
     
     

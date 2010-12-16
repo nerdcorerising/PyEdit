@@ -13,6 +13,13 @@ def createEditMenu(master):
     editmenu = tk.Menu(master, tearoff=0)
     editmenu.add_command(label="Undo",command=master.master.undo)
     editmenu.add_command(label="Redo",command=master.master.redo)
+    
+    editmenu.add_separator()
+    editmenu.add_command(labe="Copy",command=master.master.copy)
+    editmenu.add_command(labe="Cut",command=master.master.cut)
+    editmenu.add_command(labe="Paste",command=master.master.paste)
+    
+    editmenu.add_separator()
     editmenu.add_command(label="Word Count",command=master.master.updateWordCount)
     return editmenu
     
@@ -41,6 +48,18 @@ def createOptionsMenu(master,control,control2,fontlist):
         font.add_radiobutton(label=s,variable=control,value=i,command=master.master.setFontSize)
     optionsmenu.add_cascade(label="Font Size",menu=font)
 
+    tabs = tk.Menu(master, tearoff=0)
+    tabs.add_checkbutton(label="Spaces for tabs",variable=master.master.spaces,
+        command=master.master.updateTabStyle)
+    tabs.add_checkbutton(label="Magic tabs",variable=master.master.magic,
+        command=master.master.updateTabStyle)
+    size = tk.Menu(tabs, tearoff=0)
+    for i in range (9):
+        size.add_radiobutton(label=str(i),variable=master.master.tabsize,value=i,
+            command=master.master.updateTabStyle)
+    tabs.add_cascade(label="Tab Size",menu=size)
+    optionsmenu.add_cascade(label="Tab Options",menu=tabs)
+    
     return optionsmenu
     
 if __name__ == "__main__":

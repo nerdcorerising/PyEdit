@@ -28,6 +28,8 @@ class EnhancedTextBox(tk.Text):
         #get rid of trailing newline from string conversion
         block = block[:len(block) - 1]
         output.write(block)
+        #Flush is important - small files will never write
+        #to disk without it
         output.flush()
         
     def getCharWordCount(self):
@@ -39,6 +41,53 @@ class EnhancedTextBox(tk.Text):
         
     def setFont(self, f):
         self.configure(font=f)
+        
+    def copy(self, event=None):
+        self.clipboard_clear()
+        text = self.get("sel.first", "sel.last")
+        self.clipboard_append(text)
+    
+    def cut(self, event=None):
+        self.copy()
+        self.delete("sel.first", "sel.last")
+
+    def paste(self, event=None):
+        text = self.selection_get(selection='CLIPBOARD')
+        self.insert('insert', text)
+        
+    def getCursorPos(self):
+        return self.index('insert').split('.')
+        
+    def magicTab(self,spaces=4,delete=False):
+        line, column = self.getCursorPos()
+        index = "%s.0" % str(line)
+        if(delete):
+            if(spaces <= -1):
+                if(self.get(index) == "\t"):
+                    self.delete(index)
+            else:
+                endindex = "%s.%s" % (line, str(spaces))
+                text = self.get(index,endindex)
+                if(text == ' ' * spaces):
+                    self.delete(index,endindex)
+                elif(text[0] == ' '):
+                    range = 0;
+                    while(range < len(text) and text[range] == ' '):
+                        range = range + 1
+                    endindex = "%s.%s" % (line,str(range))
+                    self.delete(index,endindex)
+        else:
+            #shift the whole line over one tab, regardless of where the cursor is in the line
+            if(spaces <= -1):
+                self.insert(index, '\t')
+            else:
+                self.insert(index, ' ' * spaces)
+        
+    def insertTab(self,spaces):
+        if(spaces <= -1):
+            self.insert(self.index('insert'),'\t')
+        else:
+            self.insert(self.index('insert'),' ' * spaces)
         
 if __name__ == "__main__":
     print ("TextBox is a library.")
