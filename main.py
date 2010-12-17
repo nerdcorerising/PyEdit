@@ -1,6 +1,8 @@
 import tkinter as tk
 import menus
 import random
+import pickle
+import os
 from textbox import EnhancedTextBox          
 from tkinter import messagebox
 from tkinter import font
@@ -49,30 +51,37 @@ class Application(tk.Tk):
         self.controlType = tk.StringVar()
         self.controlType.set("Consolas")
         self.predColors = tk.StringVar()
-        #self.lines = tk.IntVar()
-        self.createMenu()
-        self.predColors.set("BlackOnWhite")
-        
-        self.createWidgets()
         
         self.spaces = tk.IntVar()
         self.magic = tk.IntVar()
         self.tabsize = tk.IntVar()
         self.tabsize.set(8)
+        
+        self.createMenu()
+        self.predColors.set("BlackOnWhite")
+        
+        self.createWidgets()
+        
+        self.columnconfigure(0,weight=1)
+        self.rowconfigure(1,weight=1)
+        
         self.setFontType()
         self.setFontSize()
         
-        
+        if(os.path.isfile("app.pickle")):
+            self.unpickle()
+            self.colorPredefined()
+            self.updateTabStyle()
         
     def createWidgets(self):
         self.status = tk.Frame(self,takefocus=False)
         
-        self.line = tk.Label(self.status, text="Line number: 1 ")
+        self.line = tk.Label(self.status, text="Line: 1 ")
         self.line.pack(side=tk.LEFT,fill=tk.Y)
-        self.column = tk.Label(self.status, text="Column number: 1 ")
+        self.column = tk.Label(self.status, text="Column: 1 ")
         self.column.pack(side=tk.LEFT,fill=tk.Y)
         
-        self.status.pack(side=tk.BOTTOM,fill=tk.X)
+        self.status.grid(sticky="ew",row=3,column=0)
         
         #Width and height are 1 so resizing doesn't get rid of the scrollbar
         self.text = EnhancedTextBox(master=self,width=10,height=10,
@@ -85,12 +94,9 @@ class Application(tk.Tk):
         self.text.config(yscrollcommand=self.vertscroll.set)
         self.text.config(xscrollcommand=self.horizscroll.set)
         
-        #self.linenumbers = tk.Text(self,takefocus=False,width=0)
-        #self.linenumbers.pack(side=tk.LEFT,fill=tk.Y)
-        
-        self.horizscroll.pack(side=tk.BOTTOM, fill=tk.X)
-        self.text.pack(side=tk.LEFT,fill=tk.BOTH,expand=tk.YES)
-        self.vertscroll.pack(side=tk.RIGHT, fill=tk.Y)
+        self.vertscroll.grid(column=1,row=1,sticky="ns")
+        self.text.grid(column=0,row=1,sticky="nesw")
+        self.horizscroll.grid(column=0,row=2,sticky="ew")
         
     def createMenu(self):
         """Create the menu widget. It is rather long and messy 
@@ -169,9 +175,9 @@ class Application(tk.Tk):
     def getPosition(self,event=None):
         """get the line and column number of the text insertion point"""
         line, column = self.text.getCursorPos()
-        s = "Line number: %s " % line
+        s = "Line: %s " % line
         self.line.configure(text=s)
-        s = "Column number: %s " % (int(column) + 1)
+        s = "Column: %s " % (int(column) + 1)
         self.column.configure(text=s)
         
     def modified(self,event=None):
@@ -272,7 +278,53 @@ class Application(tk.Tk):
         self.getPosition()
         #self.lineNumbers()
         
+    def pickle(self):
+        output = (  
+                    self.wrap,
+                    self.menurow,
+                    self.textboxrow, 
+                    self.textboxcol,
+                    self.scrollcol,
+                    self.oldr,
+                    self.spaces.get(),
+                    self.magic.get(),
+                    self.tabsize.get(),
+                    self.controlSize.get(),
+                    self.controlType.get(),
+                    self.predColors.get()
+                )
+        
+        try:
+            f = open("app.pickle","wb")
+            pickle.dump(output,f)
+        except Exception as e:
+            print("Problem storing configuration.")
+            print(e)
+    
+    def unpickle(self):
+        try:
+            f = open("app.pickle","rb")
+            input = pickle.load(f)
+            
+            self.wrap = input[0]
+            self.menurow = input[1]
+            self.textboxrow = input[2]
+            self.textboxcol = input[3]
+            self.scrollcol = input[4]
+            self.oldr = input[5]
+            self.spaces.set(input[6])
+            self.magic.set(input[7])
+            self.tabsize.set(input[8])
+            self.controlSize.set(input[9])
+            self.controlType.set(input[10])
+            self.predColors.set(input[11])
+            
+        except Exception as e:
+            print("Problem restoring configuration.")
+            print(e)
+    
     def quit(self, event=None):
+        self.pickle()
         if(not self.dirty):
             tk.Tk.quit(self)
         else:

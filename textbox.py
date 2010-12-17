@@ -83,7 +83,8 @@ class EnhancedTextBox(tk.Text):
                     endindex = "%s.%s" % (line,str(range))
                     self.delete(index,endindex)
         else:
-            #shift the whole line over one tab, regardless of where the cursor is in the line
+            #shift the whole line over one tab, regardless of 
+            #where the cursor is in the line
             if(spaces <= -1):
                 self.insert(index, '\t')
             else:

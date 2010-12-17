@@ -80,7 +80,8 @@ def createOptionsMenu(master,control,control2,fontlist):
         value="YellowOnBlack",command=master.master.colorPredefined)
     colormenu.add_separator()
     colormenu.add_command(label="Custom Text Color",command=master.master.setTextColor)
-    colormenu.add_command(label="Custom Background Color",command=master.master.setBackgroundColor)
+    colormenu.add_command(label="Custom Background Color",
+        command=master.master.setBackgroundColor)
     
     optionsmenu.add_cascade(label="Color Options",menu=colormenu)
     #optionsmenu.add_checkbutton(label="Line Numbers",variable=master.master.lines,
