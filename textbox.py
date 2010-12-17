@@ -58,6 +58,12 @@ class EnhancedTextBox(tk.Text):
     def getCursorPos(self):
         return self.index('insert').split('.')
         
+    def totalLines(self):
+        #get the index of the last character, split it on '.' to get
+        #the line number, then return the int of the first index. The
+        #minus one is because of the way the index works
+        return int(self.index(tk.END).split(".")[0]) - 1
+        
     def magicTab(self,spaces=4,delete=False):
         line, column = self.getCursorPos()
         index = "%s.0" % str(line)

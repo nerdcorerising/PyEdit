@@ -1,10 +1,12 @@
 import tkinter as tk
 import menus
+import random
 from textbox import EnhancedTextBox          
 from tkinter import messagebox
 from tkinter import font
 from tkinter.filedialog import askopenfilename 
 from tkinter.filedialog import asksaveasfilename
+from tkinter import colorchooser
 
 #Fix alignment of scrollbars
 #fix tab display size when not using spaces
@@ -17,6 +19,8 @@ class Application(tk.Tk):
     textboxcol = 0
     scrollcol = 1
     dirty = False
+    linesdeleted = True
+    oldr = 0
     
     spaces = None
     magic = None
@@ -28,9 +32,7 @@ class Application(tk.Tk):
     
     controlSize = None
     controlType = None
-    
-    #What if a system doesn't have helvetica?
-    font = ("Helvetica", 10)
+    predColors = None
     
     currentfile = None
 
@@ -42,37 +44,49 @@ class Application(tk.Tk):
         tk.Tk.__init__(self, master)   
         self.grid()
         
+        self.controlSize = tk.IntVar()
+        self.controlSize.set(12)
+        self.controlType = tk.StringVar()
+        self.controlType.set("Consolas")
+        self.predColors = tk.StringVar()
+        #self.lines = tk.IntVar()
+        self.createMenu()
+        self.predColors.set("BlackOnWhite")
+        
         self.createWidgets()
         
-        self.controlSize = tk.IntVar()
-        self.controlType = tk.StringVar()
         self.spaces = tk.IntVar()
         self.magic = tk.IntVar()
         self.tabsize = tk.IntVar()
         self.tabsize.set(8)
+        self.setFontType()
+        self.setFontSize()
         
-        self.createMenu()
         
         
     def createWidgets(self):
         self.status = tk.Frame(self,takefocus=False)
         
-        self.line = tk.Label(self.status, text="Line number: 1")
+        self.line = tk.Label(self.status, text="Line number: 1 ")
         self.line.pack(side=tk.LEFT,fill=tk.Y)
-        self.column = tk.Label(self.status, text="Column number: 1")
+        self.column = tk.Label(self.status, text="Column number: 1 ")
         self.column.pack(side=tk.LEFT,fill=tk.Y)
         
         self.status.pack(side=tk.BOTTOM,fill=tk.X)
         
         #Width and height are 1 so resizing doesn't get rid of the scrollbar
         self.text = EnhancedTextBox(master=self,width=10,height=10,
-            wrap=tk.NONE,undo=True,autoseparators=True,font=self.font)
+            wrap=tk.NONE,undo=True,autoseparators=True,
+            font=(self.controlType.get(),self.controlSize.get()))
         self.vertscroll = tk.Scrollbar(master=self)
         self.vertscroll.config(command=self.text.yview)
         self.horizscroll = tk.Scrollbar(master=self,orient=tk.HORIZONTAL)
         self.horizscroll.config(command=self.text.xview)
         self.text.config(yscrollcommand=self.vertscroll.set)
         self.text.config(xscrollcommand=self.horizscroll.set)
+        
+        #self.linenumbers = tk.Text(self,takefocus=False,width=0)
+        #self.linenumbers.pack(side=tk.LEFT,fill=tk.Y)
         
         self.horizscroll.pack(side=tk.BOTTOM, fill=tk.X)
         self.text.pack(side=tk.LEFT,fill=tk.BOTH,expand=tk.YES)
@@ -167,15 +181,13 @@ class Application(tk.Tk):
         if(size == None):
             self.setFontSize(self.controlSize.get())
         else:
-            self.font = (self.font[0], size)
-            self.text.setFont(self.font)
+            self.text.setFont((self.controlType.get(),size))
     
     def setFontType(self, type=None):
         if(type == None):
             self.setFontType(self.controlType.get())
         else:
-            self.font = (type, self.font[1])
-            self.text.setFont(self.font)
+            self.text.setFont((type,self.controlSize.get()))
     
     def updateTabStyle(self):
         pass
@@ -213,6 +225,53 @@ class Application(tk.Tk):
     def paste(self, event=None):
         self.text.paste()
         
+    def lineNumbers(self):
+        pass
+    
+    def colorPredefined(self):
+        if(self.predColors.get() == "WhiteOnBlack"):
+            textColor = (1,"#ffffff")
+            backColor = (1,"#000000")
+        elif(self.predColors.get() == "BlackOnWhite"):
+            textColor = (1,"#000000")
+            backColor = (1,"#ffffff")
+        elif(self.predColors.get() == "GreenOnBlack"):
+            textColor = (1,"#00ff00")
+            backColor = (1,"#000000")
+        elif(self.predColors.get() == "ScarletOnGrey"):
+            textColor = (1,"#ff0000")
+            backColor = (1,"#bebebe")
+        elif(self.predColors.get() == "WhiteOnBlue"):
+            textColor = (1,"#ffffff")
+            backColor = (1,"#0000ff")
+        elif(self.predColors.get() == "YellowOnBlack"):
+            textColor = (1,"#ffff00")
+            backColor = (1,"#000000")
+        else:
+            textColor = None
+            backColor = None
+            
+        self.setTextColor(textColor)
+        self.setBackgroundColor(backColor)
+        
+    def setTextColor(self,color=None):
+        if(color == None):
+            self.predColors.set("Garbage")
+            color = colorchooser.askcolor(title="Set Text Color")
+        if(color[1] != None):
+            self.text.configure(foreground=color[1])
+            
+    def setBackgroundColor(self,color=None):
+        if(color == None):
+            self.predColors.set("Garbage")
+            color = colorchooser.askcolor(title="Set Background Color")
+        if(color[1] != None):
+            self.text.configure(background=color[1])
+    
+    def updateDisplay(self,event=None):
+        self.getPosition()
+        #self.lineNumbers()
+        
     def quit(self, event=None):
         if(not self.dirty):
             tk.Tk.quit(self)
@@ -225,9 +284,9 @@ class Application(tk.Tk):
 if __name__ == "__main__":
     app = Application()                    
     app.title("PyEdit") 
-    app.text.bind("<KeyPress>", app.getPosition)
-    app.text.bind("<KeyRelease>", app.getPosition)
-    app.text.bind("<ButtonRelease>", app.getPosition)
+    app.text.bind("<KeyPress>", app.updateDisplay)
+    app.text.bind("<KeyRelease>", app.updateDisplay)
+    app.text.bind("<ButtonRelease>", app.updateDisplay)
     app.text.bind("<<Modified>>", app.modified)
     app.text.bind("<Shift-Tab>",app.shiftTab)
     app.text.bind("<Tab>", app.insertTab)

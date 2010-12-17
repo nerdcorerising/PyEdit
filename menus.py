@@ -26,6 +26,7 @@ def createEditMenu(master):
 def createOptionsMenu(master,control,control2,fontlist):
     optionsmenu = tk.Menu(master, tearoff=0)
     optionsmenu.add_checkbutton(label="Word Wrap", command=master.master.wordWrap)
+    optionsmenu.add_separator()
     
     #Add the fonts to the menu
     font = tk.Menu(master, tearoff=0)
@@ -47,7 +48,8 @@ def createOptionsMenu(master,control,control2,fontlist):
         s = str(i) + " pt."
         font.add_radiobutton(label=s,variable=control,value=i,command=master.master.setFontSize)
     optionsmenu.add_cascade(label="Font Size",menu=font)
-
+    optionsmenu.add_separator()
+    
     tabs = tk.Menu(master, tearoff=0)
     tabs.add_checkbutton(label="Spaces for tabs",variable=master.master.spaces,
         command=master.master.updateTabStyle)
@@ -59,7 +61,30 @@ def createOptionsMenu(master,control,control2,fontlist):
             command=master.master.updateTabStyle)
     tabs.add_cascade(label="Tab Size",menu=size)
     optionsmenu.add_cascade(label="Tab Options",menu=tabs)
+    optionsmenu.add_separator()
     
+    colormenu = tk.Menu(master,tearoff=0)
+    
+    colormenu.add_separator
+    colormenu.add_radiobutton(label="White on Black",variable=master.master.predColors,
+        value="WhiteOnBlack",command=master.master.colorPredefined)
+    colormenu.add_radiobutton(label="Black on White",variable=master.master.predColors,
+        value="BlackOnWhite",command=master.master.colorPredefined)
+    colormenu.add_radiobutton(label="Green on Black",variable=master.master.predColors,
+        value="GreenOnBlack",command=master.master.colorPredefined)
+    colormenu.add_radiobutton(label="Scarlet and Grey",variable=master.master.predColors,
+        value="ScarletOnGrey",command=master.master.colorPredefined)
+    colormenu.add_radiobutton(label="White on Blue",variable=master.master.predColors,
+        value="WhiteOnBlue",command=master.master.colorPredefined)
+    colormenu.add_radiobutton(label="Yellow on Black",variable=master.master.predColors,
+        value="YellowOnBlack",command=master.master.colorPredefined)
+    colormenu.add_separator()
+    colormenu.add_command(label="Custom Text Color",command=master.master.setTextColor)
+    colormenu.add_command(label="Custom Background Color",command=master.master.setBackgroundColor)
+    
+    optionsmenu.add_cascade(label="Color Options",menu=colormenu)
+    #optionsmenu.add_checkbutton(label="Line Numbers",variable=master.master.lines,
+    #    command=master.master.lineNumbers)
     return optionsmenu
     
 if __name__ == "__main__":
