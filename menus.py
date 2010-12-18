@@ -55,6 +55,7 @@ def createOptionsMenu(master,control,control2,fontlist):
         command=master.master.updateTabStyle)
     tabs.add_checkbutton(label="Magic tabs",variable=master.master.magic,
         command=master.master.updateTabStyle)
+    tabs.add_checkbutton(label="Auto Indent",variable=master.master.autoindent)
     size = tk.Menu(tabs, tearoff=0)
     for i in range (9):
         size.add_radiobutton(label=str(i),variable=master.master.tabsize,value=i,

@@ -8,11 +8,14 @@ class EnhancedTextBox(tk.Text):
         tk.Text.__init__(self,master,**kw)
         self.lexer = Lexer(lex)
         
+    def clear(self):
+        self.delete(1.0, tk.END)
+        
     def displayFile(self, file):
         """Given a file opened for reading, will 
         display the contents on the screen."""
         
-        self.delete(1.0, tk.END)
+        self.clear()
         
         for line in file:
             self.lexer.insert(line)
@@ -95,6 +98,16 @@ class EnhancedTextBox(tk.Text):
             self.insert(self.index('insert'),'\t')
         else:
             self.insert(self.index('insert'),' ' * spaces)
+        
+    def getIndent(self,line):
+        index = "%s.0" % line
+        i = 0
+        indent = ""
+        while(self.get(index) in (" ", "\t")):
+            indent = indent + self.get(index)
+            i = i + 1
+            index = "%s.%s" % (line,str(i))
+        return indent
         
 if __name__ == "__main__":
     print ("TextBox is a library.")

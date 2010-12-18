@@ -1,3 +1,5 @@
+#! /usr/bin/python3.1
+
 import tkinter as tk
 import menus
 import random
@@ -12,7 +14,7 @@ from tkinter import colorchooser
 
 #Fix alignment of scrollbars
 #fix tab display size when not using spaces
-#save options to file, reload on open
+#not showing dialog when opening new file after modifying current file
 
 class Application(tk.Tk):
     wrap = False
@@ -31,6 +33,7 @@ class Application(tk.Tk):
     status = None
     line = None
     column = None
+    autoindent = None
     
     controlSize = None
     controlType = None
@@ -51,6 +54,7 @@ class Application(tk.Tk):
         self.controlType = tk.StringVar()
         self.controlType.set("Consolas")
         self.predColors = tk.StringVar()
+        self.autoindent = tk.IntVar()
         
         self.spaces = tk.IntVar()
         self.magic = tk.IntVar()
@@ -65,13 +69,14 @@ class Application(tk.Tk):
         self.columnconfigure(0,weight=1)
         self.rowconfigure(1,weight=1)
         
-        self.setFontType()
-        self.setFontSize()
-        
         if(os.path.isfile("app.pickle")):
             self.unpickle()
             self.colorPredefined()
             self.updateTabStyle()
+        
+        self.setFontType()
+        self.setFontSize()
+
         
     def createWidgets(self):
         self.status = tk.Frame(self,takefocus=False)
@@ -136,6 +141,7 @@ class Application(tk.Tk):
             self.text.write(outfile)
             
             self.currentfile = outfile
+            self.dirty = False
         except Exception as e:
             print("Error saving file.")
             print(str(e))
@@ -222,6 +228,15 @@ class Application(tk.Tk):
         #Overrides default handler.
         return 'break'
     
+    def tabLevel(self,event=None):
+        if(self.autoindent.get()):
+            line,c = self.text.getCursorPos()
+            indent = self.text.getIndent(line) + "\n"
+            index = "%s.0" % str(int(line)+1)
+            self.text.insert(index,indent)
+            self.text.mark_set("insert", "%d.%d" % (int(line)+1, int(c)+1))
+            return 'break'
+    
     def copy(self, event=None):
         self.text.copy()
     
@@ -278,6 +293,15 @@ class Application(tk.Tk):
         self.getPosition()
         #self.lineNumbers()
         
+    def newFile(self,event=None):
+        if(self.dirty):
+            mod = messagebox.askquestion(title="Save?", 
+                message="File Modified, Save Before Opening New File?", default="yes")
+            if(mod == "yes"):
+                self.saveCurrent()
+        self.text.clear()
+        self.currentfile = None
+        
     def pickle(self):
         output = (  
                     self.wrap,
@@ -291,7 +315,8 @@ class Application(tk.Tk):
                     self.tabsize.get(),
                     self.controlSize.get(),
                     self.controlType.get(),
-                    self.predColors.get()
+                    self.predColors.get(),
+                    self.autoindent.get()
                 )
         
         try:
@@ -318,6 +343,7 @@ class Application(tk.Tk):
             self.controlSize.set(input[9])
             self.controlType.set(input[10])
             self.predColors.set(input[11])
+            self.autoindent.set(input[12])
             
         except Exception as e:
             print("Problem restoring configuration.")
@@ -332,6 +358,8 @@ class Application(tk.Tk):
                 message="File modified, quit anyways?", default="no")
             if(mod == "yes"):
                 tk.Tk.quit(self)
+
+
         
 if __name__ == "__main__":
     app = Application()                    
@@ -342,8 +370,11 @@ if __name__ == "__main__":
     app.text.bind("<<Modified>>", app.modified)
     app.text.bind("<Shift-Tab>",app.shiftTab)
     app.text.bind("<Tab>", app.insertTab)
+    app.text.bind("<Return>",app.tabLevel)
+    app.bind("<Control-n>", app.newFile)
     app.geometry('800x600+0+0')
     app.config(menu=app.menu)
     app.mainloop()
 else:
     print("Main is intended to be run, not imported.")
+    
